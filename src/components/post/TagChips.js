@@ -16,14 +16,37 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const TagChips = (props) => {
+const TagChips = ({
+  searchValue,
+  setSearchValue,
+  tagsArray,
+  tagSearchEnabled
+}) => {
   const classes = useStyles();
+
+  const handleTagClick = (e, tag) => {
+    if (tagSearchEnabled) {
+      e.preventDefault();
+      if (tag === searchValue) {
+        setSearchValue('');
+      } else {
+        setSearchValue(tag);
+      }
+    }
+  };
+
   return (
     <div component='ul' className={classes.root}>
-      {props.tagsArray.map((data) => {
+      {tagsArray.map((data) => {
         return (
           <li key={data.key}>
-            <Chip label={data.label} className={classes.chip} />
+            <Chip
+              label={data.label}
+              className={classes.chip}
+              onClick={(event) => {
+                handleTagClick(event, data.label);
+              }}
+            />
           </li>
         );
       })}
