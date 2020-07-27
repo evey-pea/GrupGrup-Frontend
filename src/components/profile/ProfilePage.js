@@ -44,6 +44,7 @@ const ProfilePage = () => {
 
   return (
     <div>
+      {!localStorage.getItem('jwt') && <Redirect to='/login' />}
       {isLoading ? (
         <Spinner />
       ) : (
