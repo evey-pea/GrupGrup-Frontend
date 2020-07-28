@@ -1,7 +1,8 @@
-import React, { useState, useContext } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { useSnackbar } from "notistack";
-import { deletePost } from "../../utils/post";
+import React, { useState, useContext } from 'react';
+import axios from 'axios';
+import { makeStyles } from '@material-ui/core/styles';
+import { useSnackbar } from 'notistack';
+import { deletePost } from '../../utils/post';
 import {
   Box,
   Button,
@@ -10,30 +11,38 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle,
-} from "@material-ui/core";
-import UserContext from "../../context/UserContext";
-import EditPostModal from "./EditPostModal";
-import CardActionArea from "@material-ui/core/CardActionArea";
-import CardContent from "@material-ui/core/CardContent";
-import CardMedia from "@material-ui/core/CardMedia";
-import Typography from "@material-ui/core/Typography";
-import TagChips from "./TagChips";
-import { useHistory } from "react-router-dom";
-import { handleNameClick } from './utils/profileUtils'
+  DialogTitle
+} from '@material-ui/core';
+import UserContext from '../../context/UserContext';
+import EditPostModal from './EditPostModal';
+import CardActionArea from '@material-ui/core/CardActionArea';
+import CardContent from '@material-ui/core/CardContent';
+import CardMedia from '@material-ui/core/CardMedia';
+import Typography from '@material-ui/core/Typography';
+import TagChips from './TagChips';
+import { useHistory } from 'react-router-dom';
 
 // Styling
 const useStyles = makeStyles({
   root: {
-    maxWidth: "100%",
-    maxHeight: "80vh",
+    maxWidth: '100%',
+    maxHeight: '80vh'
   },
   caption: {
-    maxheight: "30vh",
-    minHeight: "3rem",
-    zIndex: "20",
-    bottomMargin: 0,
+    maxheight: '30vh',
+    minHeight: '3rem',
+    zIndex: '20',
+    bottomMargin: 0
   },
+  cardMedia: {
+    width: '100%',
+    maxHeight: '50vh'
+  },
+  buttonBox: {
+    display: 'flex',
+    justifyContent: 'space-evenly',
+    paddingTop: 10
+  }
 });
 
 // Helper method
@@ -59,7 +68,7 @@ const PostCardLarge = ({
   const [editModalOpen, setEditModalOpen] = useState(false);
   const { refresh, setRefresh } = useContext(UserContext);
   let history = useHistory();
-  
+
   const handleDialogClick = () => {
     setOpen(!open);
   };
@@ -72,36 +81,28 @@ const PostCardLarge = ({
     const response = await deletePost(postContent._id, userData.token);
     if (response.id) {
       enqueueSnackbar(response.message, {
-        variant: "success",
+        variant: 'success'
       });
       setRefresh(!refresh);
-      closeModal();
     } else {
-      enqueueSnackbar("Hmmm... Something went wrong!", {
-        variant: "error",
+      enqueueSnackbar('Hmmm... Something went wrong!', {
+        variant: 'error'
       });
     }
   };
-  
 
-  // const onEdit = async () => {
-  //   const response = await updatePost(
-  //     postContent._id,
-  //     userData.token,
-  //     postData
-  //   );
-
-  //   if (response._id) {
-  //     enqueueSnackbar(response.message, {
-  //       variant: 'success'
-  //     });
-  //     handleRefresh();
-  //   } else {
-  //     enqueueSnackbar('Hmmm... Something went wrong!', {
-  //       variant: 'error'
-  //     });
-  //   }
-  // };
+  const handleNameClick = (event, content) => {
+    event.preventDefault();
+    console.log(content);
+    const profile = async () => {
+      console.log('Sending request...');
+      const info = await axios.get(
+        `https://grupgrup-backend.herokuapp.com/api/users/profile/${content.authorId}`
+      );
+      console.log(info);
+    };
+    profile();
+  };
 
   const classes = useStyles();
   return (
@@ -114,7 +115,7 @@ const PostCardLarge = ({
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button autoFocus onClick={handleDialogClick} color="primary">
+          <Button autoFocus onClick={handleDialogClick} color='primary'>
             Cancel
           </Button>
           <Button
@@ -122,7 +123,7 @@ const PostCardLarge = ({
               handleDialogClick();
               onDelete();
             }}
-            color="primary"
+            color='primary'
           >
             Delete
           </Button>
@@ -131,10 +132,9 @@ const PostCardLarge = ({
       <Card className={classes.root}>
         <CardActionArea onClick={openModal}>
           <CardMedia
-            component="img"
+            component='img'
             image={postContent.images[0]}
-            width="100%"
-            style={{ maxHeight: "50vh" }}
+            className={classes.cardMedia}
           />
         </CardActionArea>
         <CardContent className={classes.caption}>
@@ -153,27 +153,21 @@ const PostCardLarge = ({
           >
             {postContent.displayName}
           </Typography>
-          <Typography variant="body2" color="textSecondary" component="p">
+          <Typography variant='body2' color='textSecondary' component='p'>
             {postContent.caption}
           </Typography>
           {userData.user && userData.user.id === postContent.authorID && (
-            <Box
-              style={{
-                display: "flex",
-                justifyContent: "space-evenly",
-                paddingTop: 10,
-              }}
-            >
+            <Box className={classes.buttonBox}>
               <Button
-                variant="outlined"
-                color="secondary"
+                variant='outlined'
+                color='secondary'
                 onClick={handleDialogClick}
               >
                 Delete
               </Button>
               <Button
-                variant="outlined"
-                color="primary"
+                variant='outlined'
+                color='primary'
                 onClick={handleEditModalState}
               >
                 Edit
@@ -189,7 +183,7 @@ const PostCardLarge = ({
           id: postContent._id,
           tags: postContent.tags,
           caption: postContent.caption,
-          visibility: postContent.visibility,
+          visibility: postContent.visibility
         }}
       />
     </>

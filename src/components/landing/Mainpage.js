@@ -1,15 +1,37 @@
 import React, { useEffect, useState, useContext } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import { Container, Grid } from '@material-ui/core';
 import { getAllPosts } from '../../utils/post';
 import UserContext from '../../context/UserContext';
 import Searchbar from './Searchbar';
 import ToggleDisplayView from '../layout/ToggleDisplayView';
 
+const useStyles = makeStyles({
+  containerStyle: {
+    paddingTop: '30px'
+  },
+  gridContainer: {
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'stretch'
+  },
+  flexCentered: {
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  link: {
+    color: '#696969',
+    textDecoration: 'none'
+  }
+});
+
 const Mainpage = () => {
+  const classes = useStyles();
   const [posts, setPosts] = useState(null);
   const [postsOriginalState, setPostsOriginalState] = useState(null);
-  const { refresh, setRefresh } = useContext(UserContext);
+  const { refresh } = useContext(UserContext);
   const [searchValue, setSearchValue] = useState('');
+
   useEffect(() => {
     const awaitForPosts = async () => {
       const response = await getAllPosts();
@@ -28,7 +50,7 @@ const Mainpage = () => {
       for (let query of searchQuery) {
         postsOriginalState.map((post) => {
           if (post.tags.includes(query) && !filteredPosts.includes(post)) {
-            filteredPosts.push(post);
+            return filteredPosts.push(post);
           }
         });
       }
@@ -41,15 +63,8 @@ const Mainpage = () => {
   }, [searchValue]); // Run search logic when searchValue changes
 
   return (
-    <Container style={{ paddingTop: '30px' }}>
-      <Grid
-        container
-        direction='column'
-        justify='flex-start'
-        align='center'
-        alignItems='stretch'
-        spacing={3}
-      >
+    <Container className={classes.containerStyle}>
+      <Grid container className={classes.gridContainer}>
         <Grid item>
           {/* Toggle only this component so a user's posts or the search results can be toggled */}
           <Searchbar

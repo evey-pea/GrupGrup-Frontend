@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import {
   Menu,
@@ -9,14 +9,44 @@ import {
   BottomNavigationAction
 } from '@material-ui/core';
 import { Home, Publish, Person } from '@material-ui/icons';
+import { makeStyles } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
 import Fade from '@material-ui/core/Fade';
 import UserContext from '../../context/UserContext';
 
-const NavigationBar = ({ modalToggle }) => {
+// Styles
+const useStyles = makeStyles({
+  navBox: {
+    width: '100%',
+    position: 'fixed',
+    bottom: '30px',
+    zIndex: '10',
+    justifyContent: 'center'
+  },
+  bottomNav: {
+    width: '100%',
+    background: '#f7f7f7',
+    boxShadow: '12px 12px 30px #cfcfcf',
+    borderRadius: '10px',
+    zIndex: '10'
+  }
+});
+
+const navbarRoutes = {
+  '/login': 'profile',
+  '/signup': 'profile',
+  '/editprofile': 'profile',
+  '/': 'home'
+};
+
+const NavigationBar = ({ modalToggle, modalOpen }) => {
+  const location = useLocation();
+  const classes = useStyles();
   const { enqueueSnackbar } = useSnackbar();
   const { userData, setUserData } = useContext(UserContext);
-  const [currentPage, setCurrentPage] = useState('home');
+  const [currentPage, setCurrentPage] = useState(
+    navbarRoutes[location.pathname]
+  );
   const [anchorElement, setAnchorElement] = useState('');
   const isOpen = Boolean(anchorElement);
   const history = useHistory();
@@ -24,17 +54,11 @@ const NavigationBar = ({ modalToggle }) => {
     ? `/profile/${userData.user.url}`
     : '/login';
 
-  const handleChange = () => {
-    switch (window.location.pathname) {
-      case '/':
-        setCurrentPage('home');
-        break;
-      case '/profile' || '/editprofile':
-        setCurrentPage('profile');
-        break;
-      default:
-        setCurrentPage(null);
-        break;
+  // const profileRegexCheck = /\A(\/profile\/)/;
+
+  const handleChange = (e, v) => {
+    if (v !== 'new-upload' && v !== 'menu') {
+      setCurrentPage(v);
     }
   };
 
@@ -48,17 +72,21 @@ const NavigationBar = ({ modalToggle }) => {
 
   const login = () => {
     history.push('/login');
+    setCurrentPage('profile');
   };
 
   const signup = () => {
     history.push('/signup');
+    setCurrentPage('profile');
   };
 
   const about = () => {
     history.push('/about');
+    setCurrentPage('');
   };
 
   const logout = () => {
+    history.push('/login');
     setUserData({
       token: undefined,
       user: undefined
@@ -67,10 +95,11 @@ const NavigationBar = ({ modalToggle }) => {
     enqueueSnackbar(`You're logged out!`, {
       variant: 'info'
     });
+    setCurrentPage('profile');
   };
 
   return (
-    <Grid container style={styles.navBox} justify='center'>
+    <Grid container className={classes.navBox}>
       {userData.user ? (
         <Menu
           id='fade-menu'
@@ -134,9 +163,9 @@ const NavigationBar = ({ modalToggle }) => {
       )}
       <Grid item xs={12} sm={8} md={6} lg={4} xl={3}>
         <BottomNavigation
-          value={currentPage}
+          value={modalOpen ? 'new-upload' : currentPage}
           onChange={(event, value) => handleChange(event, value)}
-          style={styles.bottomNav}
+          className={classes.bottomNav}
         >
           <BottomNavigationAction
             component={Link}
@@ -168,22 +197,6 @@ const NavigationBar = ({ modalToggle }) => {
       </Grid>
     </Grid>
   );
-};
-
-const styles = {
-  navBox: {
-    width: '100%',
-    position: 'fixed',
-    bottom: '30px',
-    zIndex: '10'
-  },
-  bottomNav: {
-    width: '100%',
-    background: '#f7f7f7',
-    boxShadow: '12px 12px 30px #cfcfcf',
-    borderRadius: '10px',
-    zIndex: '10'
-  }
 };
 
 export default NavigationBar;
