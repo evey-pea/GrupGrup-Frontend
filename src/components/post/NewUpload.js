@@ -77,34 +77,43 @@ const NewUpload = ({ toggleModal }) => {
 
   const attemptCreatePost = async () => {
     if (userData.user) {
-      setIsPosting(true);
-      let postFormData = new FormData();
-      if (caption !== '') postFormData.set('caption', caption);
-      if (tags !== '') postFormData.set('tags', tags);
-      postFormData.set('displayName', userData.user.username);
-      postFormData.set('authorID', userData.user.id);
-      postFormData.set('authorURL', userData.user.url);
-      postFormData.set('visibility', visibility);
-      postFormData.append('images', files);
+      if (
+        files !== null &&
+        (files.type === 'image/jpeg' || files.type === 'image/png')
+      ) {
+        setIsPosting(true);
+        let postFormData = new FormData();
+        if (caption !== '') postFormData.set('caption', caption);
+        if (tags !== '') postFormData.set('tags', tags);
+        postFormData.set('displayName', userData.user.username);
+        postFormData.set('authorID', userData.user.id);
+        postFormData.set('authorURL', userData.user.url);
+        postFormData.set('visibility', visibility);
+        postFormData.append('images', files);
 
-      const config = {
-        'Content-Type': 'multipart/form-data',
-        'auth-token': userData.token
-      };
+        const config = {
+          'Content-Type': 'multipart/form-data',
+          'auth-token': userData.token
+        };
 
-      const response = await createNewPost(postFormData, config);
+        const response = await createNewPost(postFormData, config);
 
-      if (response.images) {
-        enqueueSnackbar(`Post successfuly created!`, {
-          variant: 'success'
-        });
-        setRefresh(!refresh);
-        toggleModal();
+        if (response.images) {
+          enqueueSnackbar(`Post successfuly created!`, {
+            variant: 'success'
+          });
+          setRefresh(!refresh);
+          toggleModal();
+        } else {
+          enqueueSnackbar(response, {
+            variant: 'error'
+          });
+          setIsPosting(false);
+        }
       } else {
-        enqueueSnackbar(response, {
-          variant: 'error'
+        enqueueSnackbar(`Please choose either a JPEG or PNG!`, {
+          variant: 'info'
         });
-        setIsPosting(false);
       }
     } else {
       enqueueSnackbar(`You need to log in to create a post!`, {
@@ -121,7 +130,7 @@ const NewUpload = ({ toggleModal }) => {
           id='previewImage'
           image={file}
           component='img'
-          title='salad woman'
+          title='Upload Preview'
           style={{
             height: '300px',
             paddingBottom: '10px'
